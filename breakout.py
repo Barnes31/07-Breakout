@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, pygame, random, time, math, glob
+import random
 assert sys.version_info >= (3,4), 'This script requires at least Python 3.4'
 
 
@@ -14,6 +15,13 @@ WEST = math.pi/2
 NORTHWEST = 3/4*math.pi
 
 
+class Background(pygame.sprite.Sprite):
+                    def __init__(self, image_file, location):
+                        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
+                        self.image = pygame.image.load('bg.jpg')
+                        self.rect = self.image.get_rect()
+                        self.rect.left, self.rect.top = location
+        
 def addVectors(vect1, vect2):
 	""" Returns the sum of two vectors """
 	(angle1, length1) = vect1
@@ -167,7 +175,7 @@ class Ball(pygame.sprite.Sprite):
 		(self.angle,self.speed) = self.vector
 
 	def bounce_off_block(self,block):
-		block_speed = self.speed*2
+		block_speed = self.speed*1
 		#corners first
 		if self.rect.right == block.rect.left and self.rect.bottom == block.rect.top:
 			direction = NORTHWEST
@@ -266,16 +274,37 @@ class Block(pygame.sprite.Sprite):
 	def draw(self,screen):	
 		screen.blit(self.image, (self.rect.x, self.rect.y))
 		
+colors = {
+                'bright lime' : [0,255,0],
+                'violet' : [204, 153, 255],
+                 'blue' : [153,153,255],
+                'green' : [153,255,204],
+                'Light blue' : [153,255,255],
+                'red' : [255,153,153],
+                'pink' : [255,153,255],
+                'lime' : [153,255,153],
+                'baby' : [153,204,255],
+                'pink2' : [255,0,255],
+                'baby2' : [0,128,255],
+                'purple2' : [127,0,255],
+                'blue2' : [0,0,255],
+                'brightb' : [0,255,255],
+                'brightg' : [0,255,128],
+}
+colorlist = list(colors.keys())
 
 screen_size = (1024,768)
 FPS = 60
 points_position = (10,10)
 lives_position = (1000,10)
-display_color = (255,255,255)
+display_color = colors[colorlist[random.randint(0, len(colors) -1)]]
+BackGround = Background('bg.jpg', [0,0])
+
+
 
 paddle_pos = (0,700)
-paddle_size = (80,15)
-paddle_color = (255,255,255)
+paddle_size = (100,15)
+paddle_color =  [204, 153, 255]
 paddle_max_speed = 60
 
 num_blocks = 10
@@ -284,14 +313,14 @@ block_pos = (100,80)
 block_size = (80,15)
 block_margin = 4
 block_points = 10
-block_color = (255,255,255)
 
-ball_pos = (200,300)
+
+ball_pos = (500,384)
 ball_size = 10
 ball_elasticity = 1
 ball_color = (255,255,255)
 ball_initial_vector = (7/4*math.pi, 15.0)
-ball_max_speed = 30.0
+ball_max_speed = 15.0
 
 gravity = (math.pi,9.8)
 
@@ -307,12 +336,17 @@ def main():
 	paddles = pygame.sprite.Group()
 	blocks = pygame.sprite.Group()
 	pos = (0,0)
+	count = 0
+	pygame.mixer.music.load('Music.mp3')
+	pygame.mixer.music.play(-1)
 	
 	(start_x,start_y) = block_pos
 	(block_w,block_h) = block_size
 	for r in range(0,num_block_rows):
 		for b in range(0,num_blocks):
 			points = block_points*(r+1)
+			count = count + 1
+			block_color = colors[colorlist[count % len(colors)]]
 			block = Block(block_size,points,block_color)
 			block.move_to(block_pos,block_size,block_margin,b,r)
 			blocks.add(block)
@@ -321,7 +355,8 @@ def main():
 	
 	while lives >= 0 and len(blocks):
 		clock.tick(FPS)
-		screen.fill((0,0,0))
+		screen.fill([255, 255, 255])
+		screen.blit(BackGround.image, BackGround.rect)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
@@ -362,5 +397,8 @@ def main():
 		game.draw_points(screen,points)
 		pygame.display.flip()
 
+
 if __name__ == '__main__':
 	main()
+
+
